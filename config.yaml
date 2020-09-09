@@ -1,0 +1,44 @@
+# config file for visual servoing lab
+
+iterMax: 10000
+errMin: .001
+
+# which features to use
+useXY: 0            # Cartesian coordinates
+usePolar: 1            # polar coordinates
+use2Half: 0       # 2.1/2 D VS
+translation3D: None # None / cTo / cdTc
+rotation3D: None    # None / cdRc / cRcd
+
+# how we estimate Z
+# negative -> use current value
+# positive -> use this value
+# zero -> use value at desired pose
+z_estim: -1
+
+# start and end poses - from tags below
+startPos: cMo_180
+endPos: cdMo
+
+# standard desired pose
+cdMo: [0,0,1,0,0,0]
+
+# large translation error to standard desired pose
+cMo_t: [.2,-.3,3,-.03,.1,0]
+
+# large rotation error to standard desired pose
+cMo_r: [.01,-.05,.8,.5,-.6,2.5]
+
+# local min for XY
+cMo_lm: [0.3,-0.2,2,0,0.785398163397448,0.7]
+cdMo_lm : [0,0,1,0,-0.785398163397448,0.7]
+
+# large Z rotation
+cMo_180: [0, 0, 0.4, 0, 0, -2.6]
+
+# nearer to object
+cMo_visi: [0.05,0.02,0.7,-0.7,-1,2.8]
+cdMo_visi: [0,0,0.5,0,0,0]
+
+# gain tuning
+lambda: 0.2
