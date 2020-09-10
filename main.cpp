@@ -10,28 +10,30 @@ int main(int argc, const char **argv)
   FeatureStack stack(sim);
 
   // configuration file
-  auto config = sim.config();
+  auto config = stack.config();
 
-  // get features that we use
-  const bool useXY(stack.readConfigXY());
-  const bool usePolar(stack.readConfigPolar());
-  const bool use2Half(stack.readConfig2Half() );
+  // get considered features from configuration
+  const auto useXY(stack.readConfigXY());
+  const auto usePolar(stack.readConfigPolar());
+  const auto use2Half(stack.readConfig2Half() );
   const auto translation3D(stack.readConfigTranslation());
   const auto rotation3D(stack.readConfigRotation());
 
   // tuning
-  const double err_min(config.read<double>("errMin"));
-  const double lambda(config.read<double>("lambda"));
+  const auto err_min(config.read<double>("errMin"));
+  const auto lambda(config.read<double>("lambda"));
   const auto iter_max(config.read<uint>("iterMax"));
 
   // TODO add features to the stack depending on the configuration
+
+
 
 
   stack.summary();
 
   // loop variables
   uint iter(0);
-  double err(2*err_min);
+  auto err(2*err_min);
   vpColVector s, sd = stack.sd(), v(6);
   vpMatrix L;
   vpHomogeneousMatrix cMo;
@@ -47,6 +49,8 @@ int main(int argc, const char **argv)
 
 
     // TODO compute velocity twist and send it to the simulation
+
+
 
     sim.setVelocity(v);
 

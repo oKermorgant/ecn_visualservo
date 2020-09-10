@@ -19,10 +19,7 @@ class Simulator
 {
 public:
   Simulator();
-  log2plot::ConfigManager config() const
-  {
-    return config_manager;
-  }
+
   void setVelocity(const vpColVector &v);
 
   vpHomogeneousMatrix currentPose() const

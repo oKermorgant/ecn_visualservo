@@ -79,6 +79,11 @@ void Simulator::setVelocity(const vpColVector &v)
     vpImagePoint ip;
     vpMeterPixelConversion::convertPoint(cam, P.get_x(), P.get_y(), ip);
     history.push_back(ip);
+
+    vpImagePoint ipd;
+    P.track(cdMo);
+    vpMeterPixelConversion::convertPoint(cam, P.get_x(), P.get_y(), ipd);
+    vpDisplay::displayLine(Iint, ip, ipd, vpColor::darkGray);
   }
   center.track(cMo);
   uv[2*idx] = computeU(center);
@@ -89,6 +94,12 @@ void Simulator::setVelocity(const vpColVector &v)
 
   for(const auto &ip: history)
     vpDisplay::displayPoint(Iint, ip, vpColor::darkRed, 2);
+
+
+
+
+
+
   vpDisplay::flush ( Iint );
   vpDisplay::display ( Iint );
   sim.getExternalImage(Iext);

@@ -25,6 +25,11 @@ public:
     rotation{{}, RotationDescriptor::NONE}
   {}
 
+  const log2plot::ConfigManager& config() const
+  {
+    return simulator.config_manager;
+  }
+
   void addFeaturePoint(vpPoint P, PointDescriptor descriptor = PointDescriptor::XY);
   void setTranslation3D(TranslationDescriptor descriptor);
   void setRotation3D(RotationDescriptor descriptor);
