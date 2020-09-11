@@ -31,8 +31,8 @@ public:
   }
 
   void addFeaturePoint(vpPoint P, PointDescriptor descriptor = PointDescriptor::XY);
-  void setTranslation3D(TranslationDescriptor descriptor);
-  void setRotation3D(RotationDescriptor descriptor);
+  void setTranslation3D(std::string descriptor);
+  void setRotation3D(std::string descriptor);
 
   void summary() const;
 
@@ -41,12 +41,6 @@ public:
   vpColVector s() const  {return s_;}
   vpColVector sd();
   vpMatrix L() const  {return L_;}
-
-  bool readConfigXY() const;
-  bool readConfigPolar() const;
-  bool readConfig2Half() const;
-  TranslationDescriptor readConfigTranslation() const;
-  RotationDescriptor readConfigRotation() const;
 
 protected:
 
@@ -58,7 +52,7 @@ protected:
   double z_estim = -1;
 
   vpColVector s_, sd_, e_;
-  uint s_rows = 0;
+  uint dim_s = 0;
   vpMatrix L_;
 
   std::vector<std::tuple<vpPoint, const PointDescriptor, double>> points3D;

@@ -25,6 +25,7 @@ Simulator::Simulator() : config_manager(std::string(BASE_PATH) + "config.yaml")
   const auto end = config_manager.read<std::string>("endPos");
   cMo = config_manager.read<vpHomogeneousMatrix>(start);
   cdMo = config_manager.read<vpHomogeneousMatrix>(end);
+  robot.setSamplingTime(dt_ms/1000);
   robot.setPosition(cMo);
   robot.setMaxTranslationVelocity(10);
   robot.setMaxRotationVelocity(10);
@@ -43,10 +44,10 @@ Simulator::Simulator() : config_manager(std::string(BASE_PATH) + "config.yaml")
 
   // 3D points
   const double ps = 0.05;
-  points[0].setWorldCoordinates ( -ps,-ps,0 );
-  points[3].setWorldCoordinates ( -ps,ps,0 );
-  points[2].setWorldCoordinates ( ps,ps,0 );
-  points[1].setWorldCoordinates ( ps,-ps,0 );
+  points.emplace_back ( -ps,-ps,0 );
+  points.emplace_back ( -ps,ps,0 );
+  points.emplace_back ( ps,ps,0 );
+  points.emplace_back ( ps,-ps,0 );
 
   // CoG
   double x(0), y(0), z(0);
@@ -101,24 +102,28 @@ void Simulator::setVelocity(const vpColVector &v)
   sim.getExternalImage(Iext);
   vpDisplay::flush ( Iext );
   //vpDisplay::display ( Iext );
-  vpTime::wait(t0, dt);
+  vpTime::wait(t0, dt_ms);
   t0 = vpTime::measureTimeSecond();
 
   logger.update();
 }
 
-void Simulator::initLog(const std::string &exp_id, const std::string &legend)
+void Simulator::initLog(const std::string &base_path, const std::string &exp_id, const std::string &legend)
 {
   std::string log_dir(BASE_PATH);
   const auto start = config_manager.read<std::string>("startPos");
   const auto end = config_manager.read<std::string>("endPos");
 
-  log_dir += "results/" + start + "_" + end + "/" + exp_id + "/";
+  log_dir += "results/" + start + "-" + end + "/" + base_path;
   config_manager.setDirName(log_dir);  
+  config_manager.addNameElement(exp_id);
+
+  log_dir = config_manager.fullName();
+
   logger.setSavePath(log_dir);
 
   auto rel = log_dir.find("ecn_visualservo");
-  std::cout << "Saving to (...)/" << log_dir.substr(rel, log_dir.npos) <<  std::endl;
+  std::cout << "Saving to (...)/" << log_dir.substr(rel, log_dir.npos) << "_*" << std::endl;
 
   t0 = vpTime::measureTimeSecond();
   // 2D points XY (+center)
@@ -127,7 +132,7 @@ void Simulator::initLog(const std::string &exp_id, const std::string &legend)
   const double h(Iint.getRows());
 
   uv.resize(10);
-  logger.saveXY(uv, "image", "[P_1, P_2, P_3, P_4, CoG]", "u", "v");
+  logger.saveXY(uv, "_image", "[P_1, P_2, P_3, P_4, CoG]", "u", "v");
   logger.setLineType("[C0,C1,C2,C3,C4]");
   logger.showFixedObject({{0,0},{0,h},{w,h},{w,0}}, "[[0,1],[1,2],[2,3],[3,0]]", "k-");
 
@@ -144,7 +149,7 @@ void Simulator::initLog(const std::string &exp_id, const std::string &legend)
   logger.setPlotArgs("--xLim -10 " + std::to_string(w+10) + " --yLim -10 " + std::to_string(h+10));
 
   // 3D pose
-  logger.save3Dpose(pose, "pose", "'"+legend+"'", true);
+  logger.save3Dpose(pose, "_pose", "'"+legend+"'", true);
   vpPoseVector pose_d(cdMo);
   logger.showMovingCamera({pose_d[0], pose_d[1], pose_d[2], pose_d[3], pose_d[4], pose_d[5]});
   logger.showFixedRectangle(-.05, -.05, .05, .05, "b");
@@ -152,5 +157,5 @@ void Simulator::initLog(const std::string &exp_id, const std::string &legend)
 
   // velocity
   vel.resize(6);
-  logger.save(vel, "v", "[v_x,v_y,v_z,\\omega_x,\\omega_y,\\omega_z]", "Velocity");
+  logger.save(vel, "_v", "[v_x,v_y,v_z,\\omega_x,\\omega_y,\\omega_z]", "Velocity");
 }

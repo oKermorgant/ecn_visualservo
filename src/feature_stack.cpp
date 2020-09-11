@@ -1,7 +1,4 @@
 #include <feature_stack.h>
-#include <logger.h>
-
-log2plot::Logger Logger::logger(std::string(BASE_PATH));
 
 void recap(const std::string s, int n, int dim)
 {
@@ -11,7 +8,7 @@ void recap(const std::string s, int n, int dim)
 
 void FeatureStack::summary() const
 {
-  std::cout << "Total feature dimension: " << s_rows << std::endl;
+  std::cout << "Total feature dimension: " << dim_s << std::endl;
   recap(" - Points XY", pointsXY.size(), 2);
   recap(" - Points Polar", pointsPolar.size(), 2);
   recap(" - Points depths", depths.size(), 1);
@@ -21,42 +18,11 @@ void FeatureStack::summary() const
     recap(" - 3D rotations", 1, 3);
 }
 
-bool FeatureStack::readConfigXY() const
-{
-  return simulator.config_manager.read<bool>("useXY");
-}
-bool FeatureStack::readConfigPolar() const
-{
-  return simulator.config_manager.read<bool>("usePolar");
-}
-bool FeatureStack::readConfig2Half() const
-{
-  return simulator.config_manager.read<bool>("use2Half");
-}
-TranslationDescriptor FeatureStack::readConfigTranslation() const
-{
-  const auto des(simulator.config_manager.read<std::string>("translation3D"));
-  if(des == "cTo")
-    return TranslationDescriptor::cTo;
-  else if(des == "cdTc")
-    return TranslationDescriptor::cdTc;
-  return TranslationDescriptor::NONE;
-}
-RotationDescriptor FeatureStack::readConfigRotation() const
-{
-  const auto des(simulator.config_manager.read<std::string>("rotation3D"));
-  if(des == "cdRc")
-    return RotationDescriptor::cdRc;
-  else if(des == "cRcd")
-    return RotationDescriptor::cRcd;
-  return RotationDescriptor::NONE;
-}
-
 vpColVector FeatureStack::sd()
 {
   if(sd_.size() == 0)
   {
-    sd_.resize(s_rows);
+    sd_.resize(dim_s);
     computeFeatures(cdMo, false);
   }
   return sd_;
@@ -79,8 +45,6 @@ void FeatureStack::computeFeatures(const vpHomogeneousMatrix &cMo, bool current)
       translation.feature.buildFrom(cMo);
     else
       translation.feature.buildFrom(cdMo*cMo.inverse());
-    //std::cout << "T = " << translation.feature.get_s().t() << std::endl;
-    //std::cout << "Lt = \n" << translation.feature.interaction() << std::endl;
     row = update(row, translation.feature, current);
   }
 
@@ -134,48 +98,52 @@ void FeatureStack::addFeaturePoint(vpPoint P, PointDescriptor descriptor)
   if(descriptor == PointDescriptor::XY)
   {
     pointsXY.push_back(vpFeaturePoint());
-    s_rows += 2;
+    dim_s += 2;
   }
   else if(descriptor == PointDescriptor::Polar)
   {
     pointsPolar.push_back(vpFeaturePointPolar());
-    s_rows += 2;
+    dim_s += 2;
   }
   else
   {
     depths.push_back(vpFeatureDepth());
-    s_rows += 1;
+    dim_s += 1;
   }
   P.track(cdMo);
   points3D.push_back({P, descriptor, P.get_Z()});
 }
 
-void FeatureStack::setTranslation3D(TranslationDescriptor descriptor)
+void FeatureStack::setTranslation3D(std::string descriptor)
 {
-  if(descriptor == TranslationDescriptor::NONE)
-    return;
-
-  if(descriptor == TranslationDescriptor::cTo)
+  if(descriptor == "cTo")
+  {
     translation.feature.setFeatureTranslationType(vpFeatureTranslation::cMo);
-  else
+    translation.des = TranslationDescriptor::cTo;
+    dim_s += 3;
+  }
+  else if(descriptor == "cdTc")
+  {
     translation.feature.setFeatureTranslationType(vpFeatureTranslation::cdMc);
-
-  s_rows += 3;
-  translation.des = descriptor;
+    translation.des = TranslationDescriptor::cdTc;
+    dim_s += 3;
+  }
 }
 
-void FeatureStack::setRotation3D(RotationDescriptor descriptor)
+void FeatureStack::setRotation3D(std::string descriptor)
 {
-  if(descriptor == RotationDescriptor::NONE)
-    return;
-
-  if(descriptor == RotationDescriptor::cRcd)
-    rotation.feature.setFeatureThetaURotationType(vpFeatureThetaU::cRcd);
-  else
+  if(descriptor == "cdRc")
+  {
     rotation.feature.setFeatureThetaURotationType(vpFeatureThetaU::cdRc);
-
-  s_rows += 3;
-  rotation.des = descriptor;
+    rotation.des = RotationDescriptor::cdRc;
+    dim_s += 3;
+  }
+  else if(descriptor == "cRcd")
+  {
+    rotation.feature.setFeatureThetaURotationType(vpFeatureThetaU::cRcd);
+    rotation.des = RotationDescriptor::cRcd;
+    dim_s += 3;
+  }
 }
 
 void FeatureStack::initLog()
@@ -184,7 +152,7 @@ void FeatureStack::initLog()
 
   // build sub-dir and legend
   std::stringstream ss;
-  std::string exp_id, legend3D;
+  std::string base_path, legend3D;
   auto updatePath([&]()
   {
     const auto key(ss.str());
@@ -197,14 +165,14 @@ void FeatureStack::initLog()
         legend_key = "{}^c\\mathbf{T}_o";
     else if(legend_key == "cdTc")
       legend_key = "{}^{c*}\\mathbf{T}_c";*/
-    if(exp_id == "")
+    if(base_path == "")
     {
-      exp_id = key;
+      base_path = key;
       legend3D = key;
     }
     else
     {
-      exp_id += "_" + key;
+      base_path += "_" + key;
       legend3D += "+" + legend_key;
     }
     ss.str("");
@@ -246,17 +214,31 @@ void FeatureStack::initLog()
     legend << "\\theta u_x, \\theta u_y, \\theta u_z,";
   }
 
-  simulator.initLog(exp_id, legend3D);
+
+  // build ID for this experiment
+  if(pointsXY.size() || pointsPolar.size() || depths.size())
+  {
+    if(z_estim == 0)
+      ss << "Zd";
+    else if(z_estim>0)
+      ss << "Z" << z_estim;
+    else
+      ss << "Zc";
+    ss << "_";
+  }
+  ss << "lambda" << simulator.config_manager.read<double>("lambda");
+
+  simulator.initLog(base_path, ss.str(), legend3D);
 
   // plot feature error
-  s_.resize(s_rows, false);
-  e_.resize(s_rows, false);
-  L_.resize(s_rows, 6, false);
+  s_.resize(dim_s, false);
+  e_.resize(dim_s, false);
+  L_.resize(dim_s, 6, false);
 
   if(e_.size())
   {
     std::string legend_s(legend.str());
     legend_s.back() = ']';
-    simulator.logger.save(e_, "err", legend_s, "Feature error");
+    simulator.logger.save(e_, "_err", legend_s, "Feature error");
   }
 }

@@ -34,7 +34,7 @@ public:
   {
     return center;
   }
-  std::array<vpPoint, 4> observedPoints() const
+  std::vector<vpPoint> observedPoints() const
   {
     return points;
   }
@@ -59,12 +59,12 @@ protected:
   vpRobotCamera robot;
   std::vector<vpImagePoint> history;
 
-  std::array<vpPoint, 4> points;
+  std::vector<vpPoint> points;
   vpPoint center;
   vpColVector uv, vel;
 
   // time sampling
-  const double dt = 0.01 * 1000;  // ms
+  const double dt_ms = 0.01 * 1000;  // ms
   double t0;
 
 
@@ -74,7 +74,7 @@ protected:
   log2plot::ConfigManager config_manager;
   log2plot::Logger logger;
 
-  void initLog(const std::string &exp_id, const std::string &legend);
+  void initLog(const std::string &base_path, const std::string &exp_id, const std::string &legend);
   double computeV(const vpPoint &P) const
   {
     return Iint.getRows() - (cam.get_v0() + cam.get_py()*P.get_y());

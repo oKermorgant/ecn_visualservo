@@ -1,6 +1,8 @@
 #include <simulator.h>
 #include <feature_stack.h>
 
+using std::string;
+
 int main(int argc, const char **argv)
 {
   // the main simulator
@@ -9,15 +11,15 @@ int main(int argc, const char **argv)
   // to group the features into a single vector
   FeatureStack stack(sim);
 
-  // configuration file
+  // configuration file handle
   auto config = stack.config();
 
   // get considered features from configuration
-  const auto useXY(stack.readConfigXY());
-  const auto usePolar(stack.readConfigPolar());
-  const auto use2Half(stack.readConfig2Half() );
-  const auto translation3D(stack.readConfigTranslation());
-  const auto rotation3D(stack.readConfigRotation());
+  const auto useXY(config.read<bool>("useXY"));
+  const auto usePolar(config.read<bool>("usePolar"));
+  const auto use2Half(config.read<bool>("use2Half"));
+  const auto translation3D(config.read<string>("translation3D"));
+  const auto rotation3D(config.read<string>("rotation3D"));
 
   // tuning
   const auto err_min(config.read<double>("errMin"));
@@ -33,16 +35,16 @@ int main(int argc, const char **argv)
 
   // loop variables
   uint iter(0);
-  auto err(2*err_min);
-  vpColVector s(6, 1), sd = stack.sd(), v(6);
+  vpColVector s(6, err_min);
+  vpColVector sd = stack.sd();
+  vpColVector v(6);
   vpMatrix L;
-  vpHomogeneousMatrix cMo;
 
-  while(iter++ < iter_max && err > err_min && !sim.clicked())
+  // main control loop
+  while(iter++ < iter_max && s.frobeniusNorm() > err_min && !sim.clicked())
   {
-    // current transform
-    cMo = sim.currentPose();
-    stack.updateFeatures(cMo);
+    // update stack features from current simulation pose // this comment is useless, just read the code
+    stack.updateFeatures(sim.currentPose());
 
     // TODO get the current features and their interaction matrix
 
@@ -53,15 +55,11 @@ int main(int argc, const char **argv)
 
 
     sim.setVelocity(v);
+  }
 
-    // register this error
-    err = s.frobeniusNorm();
-  }
-  if(iter == iter_max || err < err_min)
-  {
-    std::cout << "Clic on the window to stop" << std::endl;
-    sim.clicked(true);
-  }
+  // wait for a last clic before exiting
+  std::cout << "Clic on the window to stop" << std::endl;
+  sim.clicked(true);
 
   sim.plot();
 }
