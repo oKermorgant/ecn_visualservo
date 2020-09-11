@@ -15,7 +15,7 @@ include_directories(
   ${LOG2PLOT_INCLUDE_DIRS}
 )
 
-add_library(${PROJECT_NAME} include/simulator.h src/simulator.cpp
+add_library(${PROJECT_NAME} SHARED include/simulator.h src/simulator.cpp
   include/feature_stack.h src/feature_stack.cpp)
 target_link_libraries(${PROJECT_NAME} ${VISP_LIBRARIES} ${LOG2PLOT_LIBRARIES} )
 

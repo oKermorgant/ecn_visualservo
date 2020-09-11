@@ -5,7 +5,7 @@
 #include <visp3/core/vpHomogeneousMatrix.h>
 #include <visp3/core/vpImage.h>
 #include <visp3/core/vpMath.h>
-#include <visp3/gui/vpDisplayX.h>
+#include <visp3/gui/vpDisplayOpenCV.h>
 #include <visp3/io/vpImageIo.h>
 #include <visp/vpRobotCamera.h>
 #include <visp3/robot/vpWireFrameSimulator.h>
@@ -41,7 +41,7 @@ public:
 
   void plot()
   {
-    logger.plot(true);
+    logger.plot();
     config_manager.saveConfig();
   }
 
@@ -53,7 +53,7 @@ public:
 protected:
   friend class FeatureStack;
   vpImage<vpRGBa> Iint, Iext;
-  vpDisplayX Dint, Dext;
+  vpDisplayOpenCV Dint, Dext;
   vpWireFrameSimulator sim;
   vpCameraParameters cam;
   vpRobotCamera robot;

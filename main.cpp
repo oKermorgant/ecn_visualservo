@@ -34,7 +34,7 @@ int main(int argc, const char **argv)
   // loop variables
   uint iter(0);
   auto err(2*err_min);
-  vpColVector s, sd = stack.sd(), v(6);
+  vpColVector s(6, 1), sd = stack.sd(), v(6);
   vpMatrix L;
   vpHomogeneousMatrix cMo;
 

@@ -96,15 +96,11 @@ void Simulator::setVelocity(const vpColVector &v)
     vpDisplay::displayPoint(Iint, ip, vpColor::darkRed, 2);
 
 
-
-
-
-
   vpDisplay::flush ( Iint );
-  vpDisplay::display ( Iint );
+  //vpDisplay::display ( Iint );
   sim.getExternalImage(Iext);
   vpDisplay::flush ( Iext );
-  vpDisplay::display ( Iext );
+  //vpDisplay::display ( Iext );
   vpTime::wait(t0, dt);
   t0 = vpTime::measureTimeSecond();
 
@@ -114,9 +110,15 @@ void Simulator::setVelocity(const vpColVector &v)
 void Simulator::initLog(const std::string &exp_id, const std::string &legend)
 {
   std::string log_dir(BASE_PATH);
-  log_dir += "results/" + exp_id + "/";
-  config_manager.setDirName(log_dir);
+  const auto start = config_manager.read<std::string>("startPos");
+  const auto end = config_manager.read<std::string>("endPos");
+
+  log_dir += "results/" + start + "_" + end + "/" + exp_id + "/";
+  config_manager.setDirName(log_dir);  
   logger.setSavePath(log_dir);
+
+  auto rel = log_dir.find("ecn_visualservo");
+  std::cout << "Saving to (...)/" << log_dir.substr(rel, log_dir.npos) <<  std::endl;
 
   t0 = vpTime::measureTimeSecond();
   // 2D points XY (+center)
@@ -146,6 +148,7 @@ void Simulator::initLog(const std::string &exp_id, const std::string &legend)
   vpPoseVector pose_d(cdMo);
   logger.showMovingCamera({pose_d[0], pose_d[1], pose_d[2], pose_d[3], pose_d[4], pose_d[5]});
   logger.showFixedRectangle(-.05, -.05, .05, .05, "b");
+  logger.setLineType("[b, b, r, g]");
 
   // velocity
   vel.resize(6);

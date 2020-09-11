@@ -231,7 +231,7 @@ void FeatureStack::initLog()
     ss << "Depth" << depths.size();
     updatePath();
     for(size_t i = 0; i < depths.size(); ++i)
-      legend << "'Z_{" << i+1 << "}',";
+      legend << "'\\log Z_{" << i+1 << "}/Z^*',";
   }
   if(translation.des != TranslationDescriptor::NONE)
   {
@@ -253,14 +253,10 @@ void FeatureStack::initLog()
   e_.resize(s_rows, false);
   L_.resize(s_rows, 6, false);
 
-
   if(e_.size())
   {
     std::string legend_s(legend.str());
     legend_s.back() = ']';
     simulator.logger.save(e_, "err", legend_s, "Feature error");
   }
-
-
-
 }

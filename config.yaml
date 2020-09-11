@@ -4,8 +4,8 @@ iterMax: 10000
 errMin: .001
 
 # which features to use
-useXY: 0            # Cartesian coordinates
-usePolar: 1            # polar coordinates
+useXY: 1            # Cartesian coordinates
+usePolar: 0            # polar coordinates
 use2Half: 0       # 2.1/2 D VS
 translation3D: None # None / cTo / cdTc
 rotation3D: None    # None / cdRc / cRcd
