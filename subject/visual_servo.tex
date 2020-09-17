@@ -30,16 +30,12 @@ Several initial / desired poses are available, and some features that lead to a 
 The lab should be done on Ubuntu (either P-robotics room or the Virtual Machine).\\
 
 \subsection{Virtual Machine update}
-On the \textbf{virtual machine} you need to install the \texttt{log2plot} module:
+On the \textbf{virtual machine} you may need to install the \texttt{log2plot} module. If the \texttt{latest\_patch.sh} is in your home directory, just run it through: \texttt{./latest\_patch.sh}. If it is not, run the following lines (it will run it at the end):
 \begin{center}\bashstyle
  \begin{lstlisting}
-sudo apt update
-sudo apt install -qy texlive-latex-extra texlive-fonts-recommended dvipng
-cd /opt/local_ws
-git clone https://github.com/oKermorgant/log2plot
-mkdir -p log2plot/build
-cd log2plot/build
-cmake .. && sudo make install
+cd ~
+git clone https://github.com/CentraleNantesRobotics/ecn_install .ecn_install
+ln -s .ecn_install/virtual_machine/latest_patch.sh . 
 \end{lstlisting}
 \end{center}
 
