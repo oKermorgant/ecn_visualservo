@@ -37,15 +37,11 @@ void FeatureStack::updateFeatures(const vpHomogeneousMatrix &cMo)
   if(dim_s)
   {
     static vpMatrix Q, R, P;
-    if(dim_s < 6)
-      (L_*L_.t()).qrPivot(Q, R, P);
-    else
-      (L_.t()*L_).qrPivot(Q, R, P);
+    (L_*L_.t()).qrPivot(Q, R, P, true);
     for(uint i = 0; i <eigvals_.size(); ++i)
     {
       eigvals_[i] = sqrt(std::abs(R[i][i]));
     }
-
   }
 }
 
@@ -247,7 +243,7 @@ void FeatureStack::initLog()
   s_.resize(dim_s, false);
   e_.resize(dim_s, false);
   L_.resize(dim_s, 6, false);
-  eigvals_.resize(dim_s < 6 ? dim_s : 6);
+  eigvals_.resize(dim_s);
 
   if(e_.size())
   {
