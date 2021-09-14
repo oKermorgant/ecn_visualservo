@@ -1,4 +1,5 @@
 #include <feature_stack.h>
+#include <Eigen/Eigenvalues>
 
 void recap(const std::string s, int n, int dim)
 {
@@ -34,14 +35,25 @@ void FeatureStack::updateFeatures(const vpHomogeneousMatrix &cMo)
     initLog();
   computeFeatures(cMo, true);
   e_ = s_-sd();
-  if(dim_s)
+  if(eigvals_.size())
   {
-    static vpMatrix Q, R, P;
-    (L_*L_.t()).qrPivot(Q, R, P, true);
-    for(uint i = 0; i <eigvals_.size(); ++i)
+    static Eigen::MatrixXd LLp(dim_s, dim_s);
+    static vpMatrix LLp_visp;
+    LLp_visp = L_true_*L_.pseudoInverse(1e-15);
+
+    for(uint row=0; row < dim_s; ++row)
     {
-      eigvals_[i] = sqrt(std::abs(R[i][i]));
+      for(uint col = 0; col < dim_s; ++col)
+      {
+        LLp(row, col) = LLp_visp[row][col];
+      }
     }
+
+    const auto eigv{LLp.eigenvalues()};
+
+    for(uint row = 0; row < dim_s; ++row)
+      eigvals_[row] = eigv(row).real();
+    std::sort(eigvals_.begin(), eigvals_.end());
   }
 }
 
@@ -73,6 +85,7 @@ void FeatureStack::computeFeatures(const vpHomogeneousMatrix &cMo, bool current)
   {
     P.track(cMo);
     const double z(P.get_Z());
+    const auto P_true{P};
     // Z-estimation
     if(current)
     {
@@ -84,19 +97,25 @@ void FeatureStack::computeFeatures(const vpHomogeneousMatrix &cMo, bool current)
     if(descriptor == PointDescriptor::XY)
     {
       xy->buildFrom(P.get_x(), P.get_y(), P.get_Z());
-      row = update(row, *xy, current);
+      static vpFeaturePoint xy_true;
+      vpFeatureBuilder::create(xy_true, P_true);
+      row = update(row, *xy, current, &xy_true);
       xy++;
     }
     else if(descriptor == PointDescriptor::Polar)
     {
       vpFeatureBuilder::create(*rt, P);
-      row = update(row, *rt, current);
+      static vpFeaturePointPolar rt_true;
+      vpFeatureBuilder::create(rt_true, P_true);
+      row = update(row, *rt, current, &rt_true);
       rt++;
     }
     else
     {
       d->buildFrom(P.get_x(), P.get_y(), P.get_Z(), log(z/zd));
-      row = update(row, *d, current);
+      static vpFeatureDepth d_true;
+      d_true.buildFrom(P_true.get_x(), P_true.get_y(), P_true.get_Z(), log(P_true.get_Z()/zd));
+      row = update(row, *d, current, &d_true);
       d++;
     }
   }
@@ -243,7 +262,6 @@ void FeatureStack::initLog()
   s_.resize(dim_s, false);
   e_.resize(dim_s, false);
   L_.resize(dim_s, 6, false);
-  eigvals_.resize(dim_s);
 
   if(e_.size())
   {
@@ -251,7 +269,11 @@ void FeatureStack::initLog()
     legend_s.back() = ']';
     simulator.logger.save(e_, "_err", legend_s, "Feature error");
 
-    simulator.logger.save(eigvals_, "_eigvals", "\\lambda_", "Eigen values");
-    simulator.logger.setPlotArgs("--logY");
+    if(dim_s > 6 || ((pointsXY.size() + pointsPolar.size() || depths.size()) && z_estim >= 0))
+    {
+      L_true_.resize(dim_s, 6, false);
+      eigvals_.resize(dim_s);
+      simulator.logger.save(eigvals_, "_eigvals", "\\lambda_", "<Eigen values of >L\\hat{L}^+");
+    }
   }
 }

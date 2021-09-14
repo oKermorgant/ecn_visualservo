@@ -54,9 +54,10 @@ protected:
   const vpHomogeneousMatrix& cdMo;
   double z_estim = -1;
 
-  vpColVector s_, sd_, e_, eigvals_;
+  vpColVector s_, sd_, e_;
+  std::vector<double> eigvals_;
   uint dim_s = 0;
-  vpMatrix L_;
+  vpMatrix L_, L_true_;
 
   std::vector<std::tuple<vpPoint, const PointDescriptor, double>> points3D;
   std::vector<vpFeaturePoint> pointsXY;
@@ -73,15 +74,24 @@ protected:
   Feature3D<vpFeatureTranslation, TranslationDescriptor> translation;
   Feature3D<vpFeatureThetaU, RotationDescriptor> rotation;
 
-  uint update(uint row, vpBasicFeature &f, bool current)
+  uint update(uint row, vpBasicFeature &f, bool current, vpBasicFeature *f_true = nullptr)
   {
     if(current)
     {
       L_.insert(f.interaction(), row, 0);
       s_.insert(row, f.get_s());
+
+      if(eigvals_.size())
+      {
+        if(f_true)
+          L_true_.insert(f_true->interaction(), row, 0);
+        else
+          L_true_.insert(f.interaction(), row, 0);
+      }
     }
     else
       sd_.insert(row, f.get_s());
+
     return row + f.dimension_s();
   }
 
