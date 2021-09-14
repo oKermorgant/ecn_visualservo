@@ -23,7 +23,10 @@ public:
     z_estim(sim.config_manager.read<double>("z_estim")),
     translation{{}, TranslationDescriptor::NONE},
     rotation{{}, RotationDescriptor::NONE}
-  {}
+  {
+    setTranslation3D(config().read<std::string>("translation3D"));
+    setRotation3D(config().read<std::string>("rotation3D"));
+  }
 
   const log2plot::ConfigManager& config() const
   {

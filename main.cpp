@@ -14,12 +14,11 @@ int main(int argc, const char **argv)
   // configuration file handle
   auto config = stack.config();
 
-  // get considered features from configuration
+  // get considered 2D features from configuration
+  // 3D features are loaded if not "none"
   const auto useXY(config.read<bool>("useXY"));
   const auto usePolar(config.read<bool>("usePolar"));
   const auto use2Half(config.read<bool>("use2Half"));
-  const auto translation3D(config.read<string>("translation3D"));
-  const auto rotation3D(config.read<string>("rotation3D"));
 
   // tuning
   const auto err_min(config.read<double>("errMin"));
@@ -27,6 +26,8 @@ int main(int argc, const char **argv)
   const auto iter_max(config.read<uint>("iterMax"));
 
   // TODO add features to the stack depending on the configuration
+
+
 
 
 

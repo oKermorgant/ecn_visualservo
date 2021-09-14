@@ -105,10 +105,13 @@ We assume that:
  \begin{itemize}
   \item the center of gravity of the simulation with Cartesian coordinates
   \item the center of gravity of the simulation with depth coordinate
-  \item a 3D rotation (either $\Pass{c}{\mathbf{R}}{c*}$ or $\Pass{c*}{\mathbf{R}}{c}$)
+  \item a 3D rotation (either $\Pass{c}{\mathbf{R}}{c*}$ or $\Pass{c*}{\mathbf{R}}{c}$).\\Use \texttt{stack.setRotation3D("cdRc")} or \texttt{stack.setRotation3D("cRcd")}
  \end{itemize}
- \item The 3D translation should be set to the one read from the configuration
- \item The 3D rotation should be set to the one read from the configuration
+ \item The 3D translation and rotation are automatically used if they have a valid value in the configuration file:
+ \begin{itemize}
+  \item Translation can be \texttt{"cdTc"} ($\Pass{c*}{\mathbf{t}}{c}$) or \texttt{"cTo"} ($\Pass{c}{\mathbf{t}}{o}$)
+  \item Rotation can be  \texttt{"cdRc"} ($\Pass{c*}{\mathbf{R}}{c}$) or \texttt{"cRcd"} ($\Pass{c}{\mathbf{R}}{c*}$)
+ \end{itemize}
 \end{itemize}
 Documentation on the \texttt{FeatureStack} class is available in Appendix \ref{app:stack}. It describes how to add new features to the stack.\\
 
