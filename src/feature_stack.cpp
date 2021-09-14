@@ -34,6 +34,19 @@ void FeatureStack::updateFeatures(const vpHomogeneousMatrix &cMo)
     initLog();
   computeFeatures(cMo, true);
   e_ = s_-sd();
+  if(dim_s)
+  {
+    static vpMatrix Q, R, P;
+    if(dim_s < 6)
+      (L_*L_.t()).qrPivot(Q, R, P);
+    else
+      (L_.t()*L_).qrPivot(Q, R, P);
+    for(uint i = 0; i <eigvals_.size(); ++i)
+    {
+      eigvals_[i] = sqrt(std::abs(R[i][i]));
+    }
+
+  }
 }
 
 void FeatureStack::computeFeatures(const vpHomogeneousMatrix &cMo, bool current)
@@ -158,13 +171,13 @@ void FeatureStack::initLog()
     const auto key(ss.str());
     auto legend_key(key);
     /* if(legend_key == "cdRc")
-      legend_key = "{}^{c*}\\mathbf{R}_c";
-    else if(legend_key == "cRcd")
-      legend_key = "{}^c\\mathbf{R}_{c*}";
-    else if(legend_key == "cTo")
-        legend_key = "{}^c\\mathbf{T}_o";
-    else if(legend_key == "cdTc")
-      legend_key = "{}^{c*}\\mathbf{T}_c";*/
+                          legend_key = "{}^{c*}\\mathbf{R}_c";
+                        else if(legend_key == "cRcd")
+                          legend_key = "{}^c\\mathbf{R}_{c*}";
+                        else if(legend_key == "cTo")
+                            legend_key = "{}^c\\mathbf{T}_o";
+                        else if(legend_key == "cdTc")
+                          legend_key = "{}^{c*}\\mathbf{T}_c";*/
     if(base_path == "")
     {
       base_path = key;
@@ -234,11 +247,15 @@ void FeatureStack::initLog()
   s_.resize(dim_s, false);
   e_.resize(dim_s, false);
   L_.resize(dim_s, 6, false);
+  eigvals_.resize(dim_s < 6 ? dim_s : 6);
 
   if(e_.size())
   {
     std::string legend_s(legend.str());
     legend_s.back() = ']';
     simulator.logger.save(e_, "_err", legend_s, "Feature error");
+
+    simulator.logger.save(eigvals_, "_eigvals", "\\lambda_", "Eigen values");
+    simulator.logger.setPlotArgs("--logY");
   }
 }

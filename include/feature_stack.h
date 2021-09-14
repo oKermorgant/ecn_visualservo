@@ -51,7 +51,7 @@ protected:
   const vpHomogeneousMatrix& cdMo;
   double z_estim = -1;
 
-  vpColVector s_, sd_, e_;
+  vpColVector s_, sd_, e_, eigvals_;
   uint dim_s = 0;
   vpMatrix L_;
 
