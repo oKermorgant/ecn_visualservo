@@ -146,15 +146,17 @@ void FeatureStack::setTranslation3D(std::string descriptor)
 {
   if(descriptor == "cTo")
   {
-    translation.feature.setFeatureTranslationType(vpFeatureTranslation::cMo);
+    translation.feature.setFeatureTranslationType(vpFeatureTranslation::cMo);    
+    if(translation.des == TranslationDescriptor::NONE)
+          dim_s += 3;
     translation.des = TranslationDescriptor::cTo;
-    dim_s += 3;
   }
   else if(descriptor == "cdTc")
   {
     translation.feature.setFeatureTranslationType(vpFeatureTranslation::cdMc);
+    if(translation.des == TranslationDescriptor::NONE)
+          dim_s += 3;
     translation.des = TranslationDescriptor::cdTc;
-    dim_s += 3;
   }
 }
 
@@ -163,14 +165,16 @@ void FeatureStack::setRotation3D(std::string descriptor)
   if(descriptor == "cdRc")
   {
     rotation.feature.setFeatureThetaURotationType(vpFeatureThetaU::cdRc);
+    if(rotation.des == RotationDescriptor::NONE)
+          dim_s += 3;
     rotation.des = RotationDescriptor::cdRc;
-    dim_s += 3;
   }
   else if(descriptor == "cRcd")
   {
     rotation.feature.setFeatureThetaURotationType(vpFeatureThetaU::cRcd);
+    if(rotation.des == RotationDescriptor::NONE)
+          dim_s += 3;
     rotation.des = RotationDescriptor::cRcd;
-    dim_s += 3;
   }
 }
 

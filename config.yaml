@@ -6,11 +6,11 @@ errMin: .001
 lambda: 0.5
 
 # which features to use
-useXY: 1            # Cartesian coordinates
+useXY: 0            # Cartesian coordinates
 usePolar: 0         # polar coordinates
 use2Half: 0         # 2.1/2 D VS
-translation3D: None # None / cTo / cdTc
-rotation3D: None    # None / cdRc / cRcd
+translation3D: cTo # None / cTo / cdTc
+rotation3D: cdRc    # None / cdRc / cRcd
 
 # how we estimate Z for point features
 # negative -> use current value
@@ -19,8 +19,8 @@ rotation3D: None    # None / cdRc / cRcd
 z_estim: -1
 
 # start and end poses - from tags below
-startPos: cMo_t
-endPos: cdMo
+startPos: cMo_lm
+endPos: cdMo_lm
 
 # standard desired pose
 cdMo: [0,0,1,0,0,0]

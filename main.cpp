@@ -3,7 +3,7 @@
 
 using std::string;
 
-int main(int argc, const char **argv)
+int main()
 {
   // the main simulator
   Simulator sim;
@@ -25,19 +25,33 @@ int main(int argc, const char **argv)
   const auto lambda(config.read<double>("lambda"));
   const auto iter_max(config.read<uint>("iterMax"));
 
-  // TODO add features to the stack depending on the configuration
+  if(useXY)
+  {
+    for(auto point: sim.observedPoints())
+      stack.addFeaturePoint(point, PointDescriptor::XY);
+  }
 
+  if(usePolar)
+  {
+    for(auto point: sim.observedPoints())
+      stack.addFeaturePoint(point, PointDescriptor::Polar);
+  }
 
+  // TODO add specific features that are used when doing 2 1/2 half VS
+  if(use2Half)
+  {
 
+  }
 
-
+  // 3D features are added anyway
+  stack.setTranslation3D( config.read<string>("translation3D"));
+  stack.setRotation3D(config.read<string>("rotation3D"));
 
   stack.summary();
 
   // loop variables
   uint iter(0);
   vpColVector s(6, err_min);
-  vpColVector sd = stack.sd();
   vpColVector v(6);
   vpMatrix L;
 
@@ -52,8 +66,7 @@ int main(int argc, const char **argv)
 
 
     // TODO compute velocity twist and send it to the simulation
-
-
+    v = 0;
 
     sim.setVelocity(v);
   }
