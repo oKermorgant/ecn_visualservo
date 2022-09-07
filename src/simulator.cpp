@@ -5,7 +5,7 @@ template <typename... Args> inline void UNUSED(Args&&...) {}
 
 Simulator::Simulator() : config_manager(std::string(BASE_PATH) + "config.yaml")
 {
-  UNUSED(system("killall python"));
+  UNUSED(system("killall python3"));
 
   // init images and display
   Iint.init(480, 640, 255);
