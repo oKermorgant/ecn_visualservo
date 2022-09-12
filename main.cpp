@@ -44,29 +44,28 @@ int main()
   }
 
   // 3D features are added anyway
-  stack.setTranslation3D( config.read<string>("translation3D"));
+  stack.setTranslation3D(config.read<string>("translation3D"));
   stack.setRotation3D(config.read<string>("rotation3D"));
 
   stack.summary();
 
   // loop variables
-  uint iter(0);
+  uint iter(0);  
   vpColVector s(6, err_min);
-  vpColVector v(6);
-  vpMatrix L;
+  const auto sd{stack.sd()};
 
   // main control loop
-  while(iter++ < iter_max && s.frobeniusNorm() > err_min && !sim.clicked())
+  while(iter++ < iter_max && (s-sd).frobeniusNorm() > err_min && !sim.clicked())
   {
     // update stack features from current simulation pose // this comment is useless, just read the code
     stack.updateFeatures(sim.currentPose());
 
     // TODO get the current features and their interaction matrix
-
+    // vpMatrix L = ...
 
 
     // TODO compute velocity twist and send it to the simulation
-    v = 0;
+    vpColVector v(6);
 
     sim.setVelocity(v);
   }
