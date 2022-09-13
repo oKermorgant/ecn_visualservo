@@ -45,9 +45,15 @@ public:
     config_manager.saveConfig();
   }
 
-  bool clicked(bool wait = false)
+  bool clicked() const
   {
-    return  vpDisplay::getClick(Iint,wait);
+    return  vpDisplay::getClick(Iint,false);
+  }
+
+  void waitForClick() const
+  {
+    std::cout << "Clic on the window to stop" << std::endl;
+    vpDisplay::getClick(Iint,true);
   }
 
 protected:

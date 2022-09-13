@@ -12,18 +12,18 @@ int main()
   FeatureStack stack(sim);
 
   // configuration file handle
-  auto config = stack.config();
+  const auto config{stack.config()};
 
   // get considered 2D features from configuration
   // 3D features are loaded if not "none"
-  const auto useXY(config.read<bool>("useXY"));
-  const auto usePolar(config.read<bool>("usePolar"));
-  const auto use2Half(config.read<bool>("use2Half"));
+  const auto useXY{config.read<bool>("useXY")};
+  const auto usePolar{config.read<bool>("usePolar")};
+  const auto use2Half{config.read<bool>("use2Half")};
 
   // tuning
-  const auto err_min(config.read<double>("errMin"));
-  const auto lambda(config.read<double>("lambda"));
-  const auto iter_max(config.read<uint>("iterMax"));
+  const auto err_min{config.read<double>("errMin")};
+  const auto lambda{config.read<double>("lambda")};
+  const auto iter_max{config.read<uint>("iterMax")};
 
   if(useXY)
   {
@@ -50,14 +50,15 @@ int main()
   stack.summary();
 
   // loop variables
-  uint iter(0);  
-  vpColVector s(6, err_min);
+  uint iter(0);
   const auto sd{stack.sd()};
+  vpColVector s(sd.size(), err_min);
 
   // main control loop
   while(iter++ < iter_max && (s-sd).frobeniusNorm() > err_min && !sim.clicked())
   {
-    // update stack features from current simulation pose // this comment is useless, just read the code
+    // update stack features from current simulation pose
+    // this comment is useless, just read the code
     stack.updateFeatures(sim.currentPose());
 
     // TODO get the current features and their interaction matrix
@@ -71,8 +72,7 @@ int main()
   }
 
   // wait for a last clic before exiting
-  std::cout << "Clic on the window to stop" << std::endl;
-  sim.clicked(true);
+  sim.waitForClick();
 
   sim.plot();
 }

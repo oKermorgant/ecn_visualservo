@@ -62,6 +62,12 @@ Simulator::Simulator() : config_manager(std::string(BASE_PATH) + "config.yaml")
 
 void Simulator::setVelocity(const vpColVector &v)
 {
+  if(v.size() != 6)
+  {
+    std::cerr << "setVelocity: velocity vector is size "
+              << v.size() << ", should be 6" << std::endl;
+    return;
+  }
   robot.setVelocity(vpRobotCamera::CAMERA_FRAME, v);
   vel = v;
   robot.getPosition(cMo);
@@ -93,15 +99,13 @@ void Simulator::setVelocity(const vpColVector &v)
   vpMeterPixelConversion::convertPoint(cam, center.get_x(), center.get_y(), ip);
   history.push_back(ip);
 
-  for(const auto &ip: history)
-    vpDisplay::displayPoint(Iint, ip, vpColor::darkRed, 2);
+  for(const auto &past: history)
+    vpDisplay::displayPoint(Iint, past, vpColor::darkRed, 2);
 
 
   vpDisplay::flush ( Iint );
-  //vpDisplay::display ( Iint );
   sim.getExternalImage(Iext);
   vpDisplay::flush ( Iext );
-  //vpDisplay::display ( Iext );
   vpTime::wait(t0, dt_ms);
   t0 = vpTime::measureTimeSecond();
 
