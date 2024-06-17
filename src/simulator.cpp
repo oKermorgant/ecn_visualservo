@@ -135,10 +135,12 @@ void Simulator::initLog(const std::string &base_path, const std::string &exp_id,
   const double w(Iint.getCols());
   const double h(Iint.getRows());
 
+  const std::vector<std::vector<size_t>> rectangle{{0,1},{1,2},{2,3},{3,0}};
+
   uv.resize(10);
   logger.saveXY(uv, "_image", "[P_1, P_2, P_3, P_4, CoG]", "u", "v");
   logger.setLineType("[C0,C1,C2,C3,C4]");
-  logger.showFixedObject({{0,0},{0,h},{w,h},{w,0}}, "[[0,1],[1,2],[2,3],[3,0]]", "k-");
+  logger.showFixedShape(log2plot::Shape({{0,0},{0,h},{w,h},{w,0}},rectangle, "k-"));
 
   std::vector<std::vector<double>> des, cur;
   for(auto &P: points)
@@ -148,16 +150,20 @@ void Simulator::initLog(const std::string &base_path, const std::string &exp_id,
     P.track(cMo);
     cur.push_back({computeU(P), computeV(P)});
   }
-  logger.showFixedObject(des, "[[0,1],[1,2],[2,3],[3,0]]", "rs--");
-  logger.showFixedObject(cur, "[[0,1],[1,2],[2,3],[3,0]]", "bs--");
+
+  logger.showFixedShape(log2plot::Shape(des, rectangle, "rs--"));
+  logger.showFixedShape(log2plot::Shape(cur, rectangle, "bs--"));
   logger.setPlotArgs("--xLim -10 " + std::to_string(w+10) + " --yLim -10 " + std::to_string(h+10));
 
   // 3D pose
   logger.save3Dpose(pose, "_pose", "'"+legend+"'", true);
-  vpPoseVector pose_d(cdMo);
-  logger.showMovingCamera({pose_d[0], pose_d[1], pose_d[2], pose_d[3], pose_d[4], pose_d[5]});
-  logger.showFixedRectangle(-.05, -.05, .05, .05, "b");
-  logger.setLineType("[b, b, r, g]");
+  logger.setLineType("b");
+  vpPoseVector pose_d(cdMo.inverse());
+  const auto cam{log2plot::Camera("b")};
+  logger.showMovingShape(cam);
+  logger.showFixedShape(cam.transform(pose_d, "r", "Desired pose"));
+  logger.showFixedShape(log2plot::Box(-0.05, -0.05, 0, 0.05, 0.05, 0, "C0d", "Observed points"));
+
 
   // velocity
   vel.resize(6);
