@@ -1,11 +1,12 @@
 #include <simulator.h>
+#include <log2plot/logger.h>
 #include <visp/vpMeterPixelConversion.h>
 
 template <typename... Args> inline void UNUSED(Args&&...) {}
 
 Simulator::Simulator() : config_manager(std::string(BASE_PATH) + "config.yaml")
-{
-  UNUSED(system("killall python3"));
+{   
+  log2plot::closePreviousPlots();
 
   // init images and display
   Iint.init(480, 640, 255);
