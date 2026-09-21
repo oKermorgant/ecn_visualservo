@@ -15,6 +15,9 @@
 
 class FeatureStack;
 
+namespace visp{}
+using namespace visp;
+
 class Simulator
 {
 public:

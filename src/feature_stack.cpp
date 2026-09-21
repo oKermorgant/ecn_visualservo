@@ -79,6 +79,7 @@ void FeatureStack::computeFeatures(const vpHomogeneousMatrix &cMo, bool current)
   }
 
   auto xy(pointsXY.begin());
+  auto xyz(pointsXYZ.begin());
   auto rt(pointsPolar.begin());
   auto d(depths.begin());
   for(auto &[P, descriptor, zd]: points3D)
@@ -110,13 +111,21 @@ void FeatureStack::computeFeatures(const vpHomogeneousMatrix &cMo, bool current)
       row = update(row, *rt, current, &rt_true);
       rt++;
     }
-    else
+    else if(descriptor == PointDescriptor::Depth)
     {
       d->buildFrom(P.get_x(), P.get_y(), P.get_Z(), log(z/zd));
       static vpFeatureDepth d_true;
       d_true.buildFrom(P_true.get_x(), P_true.get_y(), P_true.get_Z(), log(P_true.get_Z()/zd));
       row = update(row, *d, current, &d_true);
       d++;
+    }
+    else
+    {
+      xyz->buildFrom(P);
+      static vpFeaturePoint3D xyz_true;
+      vpFeatureBuilder::create(xyz_true, P_true);
+      row = update(row, *xyz, current, &xyz_true);
+      xyz++;
     }
   }
 }
@@ -125,19 +134,25 @@ void FeatureStack::addFeaturePoint(vpPoint P, PointDescriptor descriptor)
 {
   if(descriptor == PointDescriptor::XY)
   {
-    pointsXY.push_back(vpFeaturePoint());
+    pointsXY.emplace_back();
     dim_s += 2;
   }
   else if(descriptor == PointDescriptor::Polar)
   {
-    pointsPolar.push_back(vpFeaturePointPolar());
+    pointsPolar.emplace_back();
     dim_s += 2;
+  }
+  else if(descriptor == PointDescriptor::Depth)
+  {
+    depths.emplace_back();
+    dim_s += 1;
   }
   else
   {
-    depths.push_back(vpFeatureDepth());
-    dim_s += 1;
+    pointsXYZ.emplace_back();
+    dim_s += 3;
   }
+
   P.track(cdMo);
   points3D.push_back({P, descriptor, P.get_Z()});
 }
@@ -232,6 +247,13 @@ void FeatureStack::initLog()
     updatePath();
     for(size_t i = 0; i < depths.size(); ++i)
       legend << "'\\log Z_{" << i+1 << "}/Z^*',";
+  }
+  if(pointsXYZ.size())
+  {
+    ss << "XYZ" << pointsXYZ.size();
+    updatePath();
+    for(size_t i = 0; i < pointsXYZ.size(); ++i)
+      legend << "'X_{" << i+1 << "}', 'Y_{" << i+1 << "}', 'Z_{" << i+1 << "}',";
   }
   if(translation.des != TranslationDescriptor::NONE)
   {

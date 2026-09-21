@@ -8,10 +8,9 @@
 #include <visp/vpFeaturePoint.h>
 #include <visp/vpFeaturePointPolar.h>
 #include <simulator.h>
-#include <memory>
 #include <vector>
 
-enum class PointDescriptor {XY, Polar, Depth};
+enum class PointDescriptor {XY, Polar, Depth, XYZ};
 enum class TranslationDescriptor {NONE, cTo, cdTc};
 enum class RotationDescriptor {NONE, cdRc, cRcd};
 
@@ -60,6 +59,7 @@ protected:
   vpMatrix L_, L_true_;
 
   std::vector<std::tuple<vpPoint, const PointDescriptor, double>> points3D;
+  std::vector<vpFeaturePoint3D> pointsXYZ;
   std::vector<vpFeaturePoint> pointsXY;
   std::vector<vpFeaturePointPolar> pointsPolar;
   std::vector<vpFeatureDepth> depths;

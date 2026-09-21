@@ -5,7 +5,7 @@ iterMax: 1000
 errMin: .001
 lambda: 0.5
 
-# which features to use
+# which features to use (0/1)
 useXY: 0            # Cartesian coordinates
 usePolar: 0         # polar coordinates
 use2Half: 0         # 2.1/2 D VS
